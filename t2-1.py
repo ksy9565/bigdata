@@ -103,6 +103,6 @@ model.score(X, y)
 output = pd.DataFrame({'PassengerId': X_test.PassengerId, 'Survived': predictions})
 output.head()
 # %%
-output.to_csv('12345.csv', index=False)
+output.to_csv('t2-1.csv', index=False)
 # %%
 model.score(test, y_test['Survived'])
