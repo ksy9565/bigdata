@@ -1,22 +1,25 @@
 """
-'f4'컬럼의 값이 'ESFJ'인 데이터를 'ISFJ'로 대체하고,
-'city'가 '경기'이면서 'f4'가 'ISFJ'인 데이터 중
-'age'컬럼의 최대값을 출력하시오!
+결측치 제거 및 그룹 합계에서 조건에 맞는 값 찾아 출력
+주어진 데이터 중 basic1.csv에서 'f1'컬럼 결측 데이터를 제거하고,
+'city'와 'f2'을 기준으로 묶어 합계를 구하고,
+'city가 경기이면서 f2가 0'인 조건에 만족하는 f1 값을 구하시오
 """
 # 라이브러리 및 데이터 불러오기
-# ESFJ 값을 가진 데이터 확인
-# 값 변경하기
-# 2개의 조건에 맞는 값중 age컬럼의 최대값
+# f1컬럼 결측치 제거
+# 그룹 합계 계산
+# 조건에 맞는 값 출력
 # %%
 import pandas as pd
 import numpy as np
 
 df = pd.read_csv('archive/basic1.csv')
+# %% 'f1'컬럼 결측 데이터 제거
+df = df.dropna(subset=['f1'])
 # %%
 df.head()
+# %% 'city'와 'f2'을 기준으로 묶어 합계 구함
+df2 = df.groupby(['city', 'f2']).sum()
 # %%
-df.loc[df['f4'] == 'ENFJ', 'f4'] = 'ISFJ'
-# %%
-df.iloc[0]
-# %%
-print(df[(df['city'] == '경기') & (df['f4'] == 'ISFJ')]['age'].max())
+df2.iloc[:, 1:]
+# %% 'city'가 경기이면서 'f2'가 0인 조건에 만족하는 f1 값
+print(df2.iloc[0]['f1'])
