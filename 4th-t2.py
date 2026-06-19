@@ -28,35 +28,55 @@ Q. [마케팅] 자동차 시장 세분화
 - pd.DataFrame({'ID': test.ID, 'Segmentation': pred})
     .to_csv('submission.csv', index=False)
 """
-# %%
 # 라이브러리 불러오기
 import pandas as pd
 
+pd.set_option('display.max_columns', None)
 # 데이터 불러오기
-train = pd.read_csv("archive/4th-t2/train.csv")
-test = pd.read_csv("archive/4th-t2/test.csv")
-# %% basic 단계
+train = pd.read_csv("archive/4th/train.csv")
+test = pd.read_csv("archive/4th/test.csv")
+
 # EDA
-train.shape, test.shape
-# %%
-# train 샘플 확인
-train.head()
-# %%
-# target 확인
-train['Segmentation'].value_counts()
-# %%
-# 결측치 확인
-train.isnull().sum(), test.isnull().sum()
-# %%
-# type 확인
-train.info()
-# %%
-train.describe()
-# %% 전처리
+print(train.info())
+print(test.info())
+print(train.head())
 target = train.pop('Segmentation')
-target
-# %% 수치형 데이터만 활용하여 학습(basic)
-num_cols = ['Age', 'Work_Experience', 'Family_Size']
-train = train[num_cols]
-# %%
-test['ID']
+
+print(train.isnull().sum())
+print(test.isnull().sum())
+
+cols = ['Gender', 'Ever_Married', 'Graduated', 'Profession', 'Spending_Score', 'Var_1']
+
+df = pd.concat([train, test], ignore_index=True)
+
+from sklearn.preprocessing import LabelEncoder
+
+for col in cols:
+    le = LabelEncoder()
+    df[col] = le.fit_transform(df[col])
+
+X_train = df.iloc[:len(train)].reset_index(drop=True)
+test = df.iloc[len(train):].reset_index(drop=True)
+print(X_train.info())
+
+X_train = X_train.drop('ID', axis=1)
+test_ID = test.pop('ID')
+
+from sklearn.model_selection import train_test_split
+
+X_tr, X_val, y_tr, y_val = train_test_split(X_train, target, test_size=0.2, random_state=0)
+
+from sklearn.ensemble import RandomForestClassifier
+
+model = RandomForestClassifier(max_depth=10, random_state=0, n_estimators=200, min_samples_split=5)
+model.fit(X_tr, y_tr)
+pred = model.predict(X_val)
+
+from sklearn.metrics import f1_score
+
+print("Macro f1 score: ", f1_score(y_val, pred, average='macro'))
+
+pred = model.predict(test)
+
+submit = pd.DataFrame({'ID': test_ID, 'Segmentation': pred})
+print(submit)
